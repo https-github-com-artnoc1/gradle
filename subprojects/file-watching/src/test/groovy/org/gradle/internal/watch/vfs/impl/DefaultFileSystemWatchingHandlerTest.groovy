@@ -123,7 +123,7 @@ class DefaultFileSystemWatchingHandlerTest extends Specification {
         def newRootDirectory = new File("newRoot")
 
         when:
-        watchingHandler.buildRootDirectoryAdded(rootDirectory)
+        watchingHandler.registerRootDirectoryForWatching(rootDirectory)
         then:
         0 * _
 
@@ -138,7 +138,7 @@ class DefaultFileSystemWatchingHandlerTest extends Specification {
         0 * _
 
         when:
-        watchingHandler.buildRootDirectoryAdded(anotherBuildRootDirectory)
+        watchingHandler.registerRootDirectoryForWatching(anotherBuildRootDirectory)
         then:
         1 * watcherRegistry.fileWatcherUpdater >> fileWatcherUpdater
         1 * fileWatcherUpdater.updateRootProjectDirectories(ImmutableSet.of(rootDirectory, anotherBuildRootDirectory))
@@ -153,7 +153,7 @@ class DefaultFileSystemWatchingHandlerTest extends Specification {
         0 * _
 
         when:
-        watchingHandler.buildRootDirectoryAdded(newRootDirectory)
+        watchingHandler.registerRootDirectoryForWatching(newRootDirectory)
         then:
         1 * watcherRegistry.fileWatcherUpdater >> fileWatcherUpdater
         1 * fileWatcherUpdater.updateRootProjectDirectories(ImmutableSet.of(newRootDirectory))

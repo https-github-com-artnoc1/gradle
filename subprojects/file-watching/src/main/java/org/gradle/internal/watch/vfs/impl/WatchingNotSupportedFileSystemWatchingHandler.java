@@ -45,7 +45,7 @@ public class WatchingNotSupportedFileSystemWatchingHandler implements FileSystem
     }
 
     @Override
-    public void buildRootDirectoryAdded(File buildRootDirectory) {
+    public void registerRootDirectoryForWatching(File rootDirectoryForWatching) {
     }
 
     @Override

@@ -55,7 +55,7 @@ public class DefaultFileSystemWatchingHandler implements FileSystemWatchingHandl
     private final NotifyingUpdateFunctionRunner updateFunctionRunner;
     private final DaemonDocumentationIndex daemonDocumentationIndex;
     private final LocationsUpdatedByCurrentBuild locationsUpdatedByCurrentBuild;
-    private final Set<File> rootProjectDirectoriesForWatching = new HashSet<>();
+    private final Set<File> rootDirectoriesForWatching = new HashSet<>();
 
     private FileWatcherRegistry watchRegistry;
     private Exception reasonForNotWatchingFiles;
@@ -109,17 +109,17 @@ public class DefaultFileSystemWatchingHandler implements FileSystemWatchingHandl
     }
 
     @Override
-    public void buildRootDirectoryAdded(File buildRootDirectory) {
-        synchronized (rootProjectDirectoriesForWatching) {
-            rootProjectDirectoriesForWatching.add(buildRootDirectory);
-            updateWatchRegistry(watchRegistry -> watchRegistry.getFileWatcherUpdater().updateRootProjectDirectories(rootProjectDirectoriesForWatching));
+    public void registerRootDirectoryForWatching(File rootDirectoryForWatching) {
+        synchronized (rootDirectoriesForWatching) {
+            rootDirectoriesForWatching.add(rootDirectoryForWatching);
+            updateWatchRegistry(watchRegistry -> watchRegistry.getFileWatcherUpdater().updateRootProjectDirectories(rootDirectoriesForWatching));
         }
     }
 
     @Override
     public void beforeBuildFinished(boolean watchingEnabled) {
-        synchronized (rootProjectDirectoriesForWatching) {
-            rootProjectDirectoriesForWatching.clear();
+        synchronized (rootDirectoriesForWatching) {
+            rootDirectoriesForWatching.clear();
         }
         if (watchingEnabled) {
             if (reasonForNotWatchingFiles != null) {
@@ -184,7 +184,7 @@ public class DefaultFileSystemWatchingHandler implements FileSystemWatchingHandl
                     stopWatchingAndInvalidateHierarchy();
                 }
             });
-            watchRegistry.getFileWatcherUpdater().updateRootProjectDirectories(rootProjectDirectoriesForWatching);
+            watchRegistry.getFileWatcherUpdater().updateRootProjectDirectories(rootDirectoriesForWatching);
             updateFunctionRunner.setSnapshotDiffListener(snapshotDiffListener, this::withWatcherChangeErrorHandling);
             long endTime = System.currentTimeMillis() - startTime;
             LOGGER.warn("Spent {} ms registering watches for file system events", endTime);
