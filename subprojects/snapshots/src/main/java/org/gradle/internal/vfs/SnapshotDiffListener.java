@@ -18,6 +18,7 @@ package org.gradle.internal.vfs;
 
 import org.gradle.internal.snapshot.CompleteFileSystemLocationSnapshot;
 import org.gradle.internal.snapshot.FileSystemNode;
+import org.gradle.internal.snapshot.ReadOnlyVfsRoot;
 import org.gradle.internal.snapshot.SnapshotHierarchy;
 
 import java.util.Collection;
@@ -30,12 +31,12 @@ import java.util.Collection;
  * - it receives all the changes for one update at once.
  */
 public interface SnapshotDiffListener {
-    SnapshotDiffListener NOOP = (removedSnapshots, addedSnapshots) -> { };
+    SnapshotDiffListener NOOP = (removedSnapshots, addedSnapshots, root) -> { };
 
     /**
      * Called after the update to {@link SnapshotHierarchy} finished.
      *
      * Only the roots of added/removed hierarchies are reported.
      */
-    void changed(Collection<CompleteFileSystemLocationSnapshot> removedSnapshots, Collection<CompleteFileSystemLocationSnapshot> addedSnapshots);
+    void changed(Collection<CompleteFileSystemLocationSnapshot> removedSnapshots, Collection<CompleteFileSystemLocationSnapshot> addedSnapshots, ReadOnlyVfsRoot root);
 }

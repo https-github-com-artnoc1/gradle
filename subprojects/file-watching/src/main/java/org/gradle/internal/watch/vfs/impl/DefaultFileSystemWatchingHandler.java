@@ -60,9 +60,9 @@ public class DefaultFileSystemWatchingHandler implements FileSystemWatchingHandl
     private FileWatcherRegistry watchRegistry;
     private Exception reasonForNotWatchingFiles;
 
-    private final SnapshotDiffListener snapshotDiffListener = (removedSnapshots, addedSnapshots) -> {
+    private final SnapshotDiffListener snapshotDiffListener = (removedSnapshots, addedSnapshots, root) -> {
         if (watchRegistry != null) {
-            watchRegistry.getFileWatcherUpdater().changed(removedSnapshots, addedSnapshots);
+            watchRegistry.getFileWatcherUpdater().changed(removedSnapshots, addedSnapshots, root);
         }
     };
 
@@ -112,7 +112,11 @@ public class DefaultFileSystemWatchingHandler implements FileSystemWatchingHandl
     public void registerRootDirectoryForWatching(File rootDirectoryForWatching) {
         synchronized (rootDirectoriesForWatching) {
             rootDirectoriesForWatching.add(rootDirectoryForWatching);
-            updateWatchRegistry(watchRegistry -> watchRegistry.getFileWatcherUpdater().updateRootProjectDirectories(rootDirectoriesForWatching));
+            rootReference.update(root -> {
+                if (watchRegistry != null) {
+                    watchRegistry.getFileWatcherUpdater().updateRootProjectDirectories(rootDirectoriesForWatching, root);
+                }
+            });
         }
     }
 
@@ -131,7 +135,7 @@ public class DefaultFileSystemWatchingHandler implements FileSystemWatchingHandl
                 removeSymbolicLinks(root);
                 handleWatcherRegistryEvents(root, "for current build");
                 if (watchRegistry != null) {
-                    withWatcherChangeErrorHandling(root, () -> watchRegistry.getFileWatcherUpdater().buildFinished());
+                    withWatcherChangeErrorHandling(root, () -> watchRegistry.getFileWatcherUpdater().buildFinished(root));
                 }
                 printStatistics(root, "retains", "till next build");
             });
@@ -184,7 +188,7 @@ public class DefaultFileSystemWatchingHandler implements FileSystemWatchingHandl
                     stopWatchingAndInvalidateHierarchy();
                 }
             });
-            watchRegistry.getFileWatcherUpdater().updateRootProjectDirectories(rootDirectoriesForWatching);
+            watchRegistry.getFileWatcherUpdater().updateRootProjectDirectories(rootDirectoriesForWatching, currentRoot);
             updateFunctionRunner.setSnapshotDiffListener(snapshotDiffListener, this::withWatcherChangeErrorHandling);
             long endTime = System.currentTimeMillis() - startTime;
             LOGGER.warn("Spent {} ms registering watches for file system events", endTime);

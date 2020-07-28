@@ -19,6 +19,7 @@ package org.gradle.internal.watch.vfs.impl;
 import org.gradle.internal.file.FileMetadata;
 import org.gradle.internal.snapshot.CompleteFileSystemLocationSnapshot;
 import org.gradle.internal.snapshot.FileSystemNode;
+import org.gradle.internal.snapshot.ReadOnlyVfsRoot;
 import org.gradle.internal.snapshot.SnapshotHierarchy;
 import org.gradle.internal.vfs.SnapshotDiffListener;
 import org.gradle.internal.vfs.VfsRoot;
@@ -72,9 +73,9 @@ public class NotifyingUpdateFunctionRunner implements SnapshotHierarchy.UpdateFu
         }
 
         public SnapshotHierarchy publishSnapshotDiff(SnapshotCollectingDiffListener collectedDiff, SnapshotHierarchy newRoot) {
-            DefaultVfsRoot vfsRoot = new DefaultVfsRoot(newRoot, SnapshotHierarchy.UpdateFunctionRunner.WITHOUT_LISTENERS);
-            errorHandler.handleErrors(vfsRoot, () -> collectedDiff.publishSnapshotDiff(diffListener));
-            return vfsRoot.getDelegate();
+            DefaultVfsRoot root = new DefaultVfsRoot(newRoot, SnapshotHierarchy.UpdateFunctionRunner.WITHOUT_LISTENERS);
+            errorHandler.handleErrors(root, () -> collectedDiff.publishSnapshotDiff(diffListener, root));
+            return root.getDelegate();
         }
     }
 
@@ -87,9 +88,9 @@ public class NotifyingUpdateFunctionRunner implements SnapshotHierarchy.UpdateFu
             this.watchFilter = watchFilter;
         }
 
-        public void publishSnapshotDiff(SnapshotDiffListener snapshotDiffListener) {
+        public void publishSnapshotDiff(SnapshotDiffListener snapshotDiffListener, ReadOnlyVfsRoot root) {
             if (!removedSnapshots.isEmpty() || !addedSnapshots.isEmpty()) {
-                snapshotDiffListener.changed(removedSnapshots, addedSnapshots);
+                snapshotDiffListener.changed(removedSnapshots, addedSnapshots, root);
             }
         }
 
