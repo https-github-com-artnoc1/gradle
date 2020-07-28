@@ -63,6 +63,11 @@ public class DefaultVfsRoot implements VfsRoot {
         delegate.visitSnapshotRoots(snapshotVisitor);
     }
 
+    @Override
+    public void visitSnapshotRoots(String absolutePath, SnapshotVisitor snapshotVisitor) {
+        delegate.visitSnapshotRoots(absolutePath, snapshotVisitor);
+    }
+
     private void runUpdateFunction(SnapshotHierarchy.UpdateFunction updateFunction) {
         delegate = updateFunctionRunner.runUpdateFunction(updateFunction, delegate);
     }

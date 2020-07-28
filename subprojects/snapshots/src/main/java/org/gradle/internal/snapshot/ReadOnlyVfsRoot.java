@@ -34,4 +34,9 @@ public interface ReadOnlyVfsRoot {
     }
 
     void visitSnapshotRoots(SnapshotVisitor snapshotVisitor);
+
+    /**
+     * Visit snapshot roots which are at or below the given location.
+     */
+    void visitSnapshotRoots(String absolutePath, SnapshotVisitor snapshotVisitor);
 }
