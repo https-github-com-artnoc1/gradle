@@ -74,6 +74,38 @@ class TestTaskToolchainIntegrationTest extends AbstractPluginIntegrationTest {
         'current'      | Jvm.current()
     }
 
+
+    def "Test task is configured using default toolchain"() {
+        def someJdk = AvailableJavaHomes.getDifferentJdk()
+        buildFile << """
+            apply plugin: "java"
+
+            ${jcenterRepository()}
+
+            dependencies {
+                testImplementation 'junit:junit:4.13'
+            }
+
+            java {
+                toolchain {
+                    languageVersion = JavaVersion.toVersion(${someJdk.javaVersion.majorVersion})
+                }
+            }
+        """
+
+        file('src/test/java/ToolchainTest.java') << testClass("ToolchainTest")
+
+        when:
+        result = executer
+            .withArguments("-Porg.gradle.java.installations.paths=" + someJdk.javaHome.absolutePath, "--info")
+            .withTasks("test")
+            .run()
+
+        then:
+        outputContains("Tests running with ${someJdk.javaHome.absolutePath}")
+        noExceptionThrown()
+    }
+
     private static String testClass(String className) {
         return """
             import org.junit.*;
