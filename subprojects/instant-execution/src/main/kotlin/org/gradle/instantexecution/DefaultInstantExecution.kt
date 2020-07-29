@@ -16,6 +16,7 @@
 
 package org.gradle.instantexecution
 
+import org.gradle.api.internal.artifacts.ivyservice.projectmodule.ProjectArtifactSetResolver
 import org.gradle.api.internal.project.ProjectStateRegistry
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
@@ -44,6 +45,7 @@ import org.gradle.internal.serialize.kryo.KryoBackedDecoder
 import org.gradle.internal.serialize.kryo.KryoBackedEncoder
 import org.gradle.kotlin.dsl.support.useToRun
 import org.gradle.util.IncubationLogger
+import java.io.Closeable
 import java.io.File
 import java.io.OutputStream
 
@@ -60,7 +62,7 @@ class DefaultInstantExecution internal constructor(
     private val beanConstructors: BeanConstructors,
     private val gradlePropertiesController: GradlePropertiesController,
     private val relevantProjectsRegistry: RelevantProjectsRegistry
-) : InstantExecution {
+) : InstantExecution, Closeable {
 
     interface Host {
 
@@ -71,6 +73,10 @@ class DefaultInstantExecution internal constructor(
         fun <T> service(serviceType: Class<T>): T
 
         fun <T> factory(serviceType: Class<T>): Factory<T>
+    }
+
+    override fun close() {
+        ProjectArtifactSetResolver.dump()
     }
 
     override fun canExecuteInstantaneously(): Boolean = when {
