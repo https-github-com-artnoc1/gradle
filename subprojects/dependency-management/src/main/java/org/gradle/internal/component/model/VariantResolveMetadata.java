@@ -21,11 +21,19 @@ import org.gradle.api.capabilities.CapabilitiesMetadata;
 import org.gradle.api.internal.attributes.AttributeContainerInternal;
 import org.gradle.internal.DisplayName;
 
+import javax.annotation.Nullable;
+
 /**
  * Metadata for a basic variant of a component, that defines only artifacts and no dependencies.
  */
 public interface VariantResolveMetadata {
     String getName();
+
+    /**
+     * An identifier for this variant, if available.
+     */
+    @Nullable
+    Identifier getIdentifier();
 
     DisplayName asDescribable();
 
@@ -34,4 +42,7 @@ public interface VariantResolveMetadata {
     ImmutableList<? extends ComponentArtifactMetadata> getArtifacts();
 
     CapabilitiesMetadata getCapabilities();
+
+    interface Identifier {
+    }
 }

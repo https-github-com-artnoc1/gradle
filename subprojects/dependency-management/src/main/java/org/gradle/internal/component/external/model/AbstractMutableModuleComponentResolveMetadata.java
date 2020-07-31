@@ -578,6 +578,11 @@ public abstract class AbstractMutableModuleComponentResolveMetadata implements M
         }
 
         @Override
+        public Identifier getIdentifier() {
+            return null;
+        }
+
+        @Override
         public DisplayName asDescribable() {
             return Describables.of(componentId, "variant", name);
         }

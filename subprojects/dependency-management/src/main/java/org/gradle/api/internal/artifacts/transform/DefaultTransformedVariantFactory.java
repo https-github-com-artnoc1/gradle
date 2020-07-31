@@ -20,6 +20,7 @@ import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.artifact.ResolvedArtifactSet;
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.artifact.ResolvedVariant;
 import org.gradle.api.internal.attributes.ImmutableAttributes;
+import org.gradle.internal.component.model.VariantResolveMetadata;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,7 +37,7 @@ public class DefaultTransformedVariantFactory implements TransformedVariantFacto
 
     @Override
     public ResolvedArtifactSet transformedExternalArtifacts(ComponentIdentifier componentIdentifier, ResolvedVariant sourceVariant, ImmutableAttributes target, Transformation transformation, ExtraExecutionGraphDependenciesResolverFactory dependenciesResolverFactory) {
-        ResolvedVariant.Identifier identifier = sourceVariant.getIdentifier();
+        VariantResolveMetadata.Identifier identifier = sourceVariant.getIdentifier();
         if (identifier == null) {
             // An ad hoc variant, do not cache the result
             return new TransformedExternalArtifactSet(componentIdentifier, sourceVariant.getArtifacts(), target, transformation, dependenciesResolverFactory, transformationNodeRegistry);
@@ -50,10 +51,10 @@ public class DefaultTransformedVariantFactory implements TransformedVariantFacto
     }
 
     private static class Key {
-        final ResolvedVariant.Identifier variantIdentifier;
+        final VariantResolveMetadata.Identifier variantIdentifier;
         final ImmutableAttributes targetVariant;
 
-        public Key(ResolvedVariant.Identifier variantIdentifier, ImmutableAttributes targetVariant) {
+        public Key(VariantResolveMetadata.Identifier variantIdentifier, ImmutableAttributes targetVariant) {
             this.variantIdentifier = variantIdentifier;
             this.targetVariant = targetVariant;
         }

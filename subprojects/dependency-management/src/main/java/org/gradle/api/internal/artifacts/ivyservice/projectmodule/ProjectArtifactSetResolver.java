@@ -43,7 +43,7 @@ public class ProjectArtifactSetResolver {
     private final ArtifactResolver artifactResolver;
     // Move this state closer to the project metadata
     private final Map<ComponentArtifactIdentifier, ResolvableArtifact> allProjectArtifacts = new ConcurrentHashMap<>();
-    private final Map<VariantIdentifier, ResolvedVariant> allProjectVariants = new ConcurrentHashMap<>();
+    private final Map<VariantResolveMetadata.Identifier, ResolvedVariant> allProjectVariants = new ConcurrentHashMap<>();
 
 //    static long variantLookups = 0;
 //    static long variantsCreated = 0;
@@ -72,36 +72,18 @@ public class ProjectArtifactSetResolver {
 //                variantLookups++;
 //            }
 
-            VariantIdentifier key = new VariantIdentifier(componentIdentifier, variant.getName());
+            VariantResolveMetadata.Identifier key = variant.getIdentifier();
+            if (key == null) {
+                throw new IllegalArgumentException(String.format("variant %s does not have an identifier.", variant.asDescribable()));
+            }
             ResolvedVariant resolvedVariant = allProjectVariants.computeIfAbsent(key, k -> {
 //                synchronized (ProjectArtifactSetResolver.class) {
 //                    variantsCreated++;
 //                }
-                return DefaultArtifactSet.toResolvedVariant(componentIdentifier, variant, ownerId, moduleSources, exclusions, artifactResolver, allProjectArtifacts, artifactTypeRegistry);
+                return DefaultArtifactSet.toResolvedVariant(variant, ownerId, moduleSources, exclusions, artifactResolver, allProjectArtifacts, artifactTypeRegistry);
             });
             result.add(resolvedVariant);
         }
         return DefaultArtifactSet.createFromVariants(componentIdentifier, result.build(), schema, selectionAttributes);
-    }
-
-    private static class VariantIdentifier {
-        private final ComponentIdentifier componentIdentifier;
-        private final String variantName;
-
-        public VariantIdentifier(ComponentIdentifier componentIdentifier, String variantName) {
-            this.componentIdentifier = componentIdentifier;
-            this.variantName = variantName;
-        }
-
-        @Override
-        public int hashCode() {
-            return componentIdentifier.hashCode() ^ variantName.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            VariantIdentifier other = (VariantIdentifier) obj;
-            return componentIdentifier.equals(other.componentIdentifier) && variantName.equals(other.variantName);
-        }
     }
 }
